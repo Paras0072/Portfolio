@@ -23,6 +23,8 @@ app.post("/sendemail", (req, res) => {
 
   const transporter = nodemailer.createTransport({
     service: "gmail",
+    port: 587, // Use the appropriate port for your SMTP server
+    secure: false, // true for 465, false for other ports
     auth: {
       user: "parasthakur007241@gmail.com", // replace with your email
       pass: "bxcm zgwi yzsi uqqv", // replace with your password or use an app password
