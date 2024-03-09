@@ -2,8 +2,9 @@ const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
 const nodemailer = require("nodemailer");
-
+const cors = require("cors");
 const app = express();
+app.use(cors());
 const port = process.env.PORT || 8080;
 app.use(bodyParser.json());
 // Serve static files from the "public" directory
@@ -41,10 +42,10 @@ app.post("/sendemail", (req, res) => {
       message: "Email request received on the server.",
     });
 
-    // if (error) {
-    //   return res.status(500).send(error.toString());
-    // }
-    // res.status(200).send("Email sent: " + info.response);
+    if (error) {
+      return res.status(500).send(error.toString());
+    }
+    res.status(200).send("Email sent: " + info.response);
   });
 });
 // Handle requests to the root URL
