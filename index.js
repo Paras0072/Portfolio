@@ -12,7 +12,7 @@ app.use(express.static("public"));
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
-app.post("/sendemail", (req, res) => {
+app.post("/sendemail", async (req, res) => {
   const { name, email, phone, message, subject } = req.body;
   // For demonstration purposes, printing the data to the console
   console.log("Received client-side email request:");
@@ -22,13 +22,26 @@ app.post("/sendemail", (req, res) => {
   console.log("Message:", message);
 
   const transporter = nodemailer.createTransport({
-    service: "gmail",
-    port: 587, // Use the appropriate port for your SMTP server
-    secure: false, // true for 465, false for other ports
+    port: 465,
+    host: "smtp.gmail.com",
     auth: {
       user: "parasthakur007241@gmail.com", // replace with your email
       pass: "bxcm zgwi yzsi uqqv", // replace with your password or use an app password
     },
+    secure: true,
+  });
+
+  await new Promise((resolve, reject) => {
+    // verify connection configuration
+    transporter.verify(function (error, success) {
+      if (error) {
+        console.log(error);
+        reject(error);
+      } else {
+        console.log("Server is ready to take our message");
+        resolve(success);
+      }
+    });
   });
 
   const mailOptions = {
@@ -38,17 +51,30 @@ app.post("/sendemail", (req, res) => {
     text: `Name: ${name}\nEmail: ${email}\nMobile Number: ${phone}\n\nMessage: ${message}\n\nSubject: ${subject}`,
   };
 
-  transporter.sendMail(mailOptions, (error, info) => {
-    res.json({
-      status: "success",
-      message: "Email request received on the server.",
-    });
+  await new Promise((resolve, reject) => {
+    // SEND MAIL
 
-    if (error) {
-      return res.status(500).send(error.toString());
-    }
-    res.status(200).send("Email sent: " + info.response);
+    transporter.sendMail(mailOptions, (error, info) => {
+      // res.json({
+      //   status: "success",
+      //   message: "Email request received on the server.",
+      // });
+
+      // if (error) {
+      //   return res.status(500).send(error.toString());
+      // }
+      // res.status(200).send("Email sent: " + info.response);
+
+      if (error) {
+        console.log(error);
+        reject(error);
+      } else {
+        console.log(info);
+        resolve(info);
+      }
+    });
   });
+  res.status(200).json({ status: "OK" });
 });
 // Handle requests to the root URL
 const cvFileName = "Resume.pdf";
